@@ -51,39 +51,44 @@ async def app():
     Remember, your primary function is to improve the quality of research."""
 
     # Prompt user for course input
-    course = st.text_input("Enter your course:", key="course")
+    course = st.sidebar.text_input("Enter your course:", key="course")
+    if st.sidebar.button("Submit"):
+        # Display the entered course (optional)
+        options = []
+        if course:
+            st.write("Your course:", course)
+            prompt = f"Give me a list of research areas in the course{course}. Provide the list as individual items separated by commas. Provide only the list on the required format and do not include any additional information."
+            research_areas = await generate_response(prompt, context)
+            options = split_comma_separated_string(research_areas)
 
-    # Display the entered course (optional)
-    if course:
-        st.write("Your course:", course)
-        prompt = f"Give me a list of research areas in the course{course}. Provide the list as individual items separated by commas. Provide only the list on the required format and do not include any additional information."
-        research_areas = await generate_response(prompt, context)
-        st.write("Research areas:", research_areas)
+        else:
+            st.warning("Please enter your course.") 
+            return
 
         # Create the combobox (selectbox) with a descriptive label
-        selected_option = st.selectbox(
+        selected_option = st.sidebar.selectbox(
             label="Choose the research area:",
-            options=split_comma_separated_string(research_areas),
-            index=0  # Optionally set a default selected index
+            options=options,
+            index=0  # Optionally set a default selected index  
         )
 
-    else:
-        st.warning("Please enter your course.") 
-        return
 
+    if selected_option:
+        research_area = selected_option
 
-    question = f"For the course {course} and the research area {selected_option}, give me 3 research problems.  Provide the title, abstract and research objectives for each research problem."
 
     # Create a checkbox and store its value
     checkbox_value = st.checkbox("Check this box if you want to input your own prompt.")
 
-    # Display whether the checkbox is checked or not
-    if checkbox_value:
-        # Ask the user to input text
-        question = st.text_input("Please input a custom prompt: ")
-
     # Button to generate response
     if st.button("Generate Response"):
+        question = f"For the course {course} and the research area {research_area}, give me 3 research problems.  Provide the title, abstract and research objectives for each research problem."
+
+        # Display whether the checkbox is checked or not
+        if checkbox_value:
+            # Ask the user to input text
+            question = st.text_input("Please input a custom prompt: ")
+
         progress_bar = st.progress(0, text="The AI teacher co-pilot is processing the request, please wait...")
         if question:
             response = await generate_response(question, context)
