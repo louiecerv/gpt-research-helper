@@ -36,10 +36,6 @@ async def generate_response(question, context):
 if "current_form" not in st.session_state:
     st.session_state["current_form"] = 1    
 
-if "course" not in st.session_state:
-    st.session_state["course"] = ""
-
-
 async def app():
     st.session_state["current_form"] = 1
     form1 = st.form("Introduction")
@@ -58,13 +54,15 @@ async def app():
     course = form1.text_input("Enter your course:", key="course")
 
     submit1 = form1.form_submit_button("Submit")
+
     if submit1:
         if course:
-            st.session_state["course"] = course
+            if "course" not in st.session_state:
+                st.session_state["course"] = course
             st.session_state["current_form"] = 2
             display_form2()
         else:
-            st.warning("Please enter your course.")        
+            form1.warning("Please enter your course.")        
 
 async def display_form2():
     course = st.session_state["course"]
