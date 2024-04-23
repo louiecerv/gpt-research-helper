@@ -32,26 +32,17 @@ async def generate_response(question, context):
                 {"role": "system", "content": context}])
     return completion.choices[0].message.content
 
+# Use session state to track the current form
+if "current_form" not in st.session_state:
+    st.session_state["current_form"] = 1    
+
+if "course" not in st.session_state:
+    st.session_state["course"] = ""
+
+
 async def app():
-    # Use session state to track the current form
-    if "current_form" not in st.session_state:
-        st.session_state["current_form"] = 1    
-
-    # Display the appropriate form based on the current form state
-    if st.session_state["current_form"] == 1:
-        display_form1()
-    elif st.session_state["current_form"] == 2:
-        display_form2()
-    elif st.session_state["current_form"] == 3:
-        display_form3()
-        
-    if "course" not in st.session_state:
-        st.session_state["course"] = ""
-
-async def display_form1():
     st.session_state["current_form"] = 1
     form1 = st.form("Introduction")
-
     form1.subheader("Reseach Topic Helper")
 
     text = """Prof. Louie F. Cervantes, M. Eng. (Information Engineering) \n
@@ -73,8 +64,7 @@ async def display_form1():
             st.session_state["current_form"] = 2
             display_form2()
         else:
-            st.warning("Please enter your course.")     
-        
+            st.warning("Please enter your course.")        
 
 async def display_form2():
     course = st.session_state["course"]
@@ -130,5 +120,5 @@ async def display_form3():
 
 #run the app
 if __name__ == "__main__":
-  import asyncio
-  asyncio.run(app())
+    import asyncio
+    asyncio.run(app())
