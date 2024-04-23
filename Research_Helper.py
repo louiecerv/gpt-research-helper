@@ -32,12 +32,17 @@ async def generate_response(question, context):
                 {"role": "system", "content": context}])
     return completion.choices[0].message.content
 
-# Use session state to track the current form
-if "current_form" not in st.session_state:
-    st.session_state["current_form"] = 1    
 
 async def app():
-    st.session_state["current_form"] = 1
+    if "current_form" not in st.session_state:
+        st.session_state["current_form"] = 1    
+
+    # Display the appropriate form based on the current form state
+    if st.session_state["current_form"] == 2:
+        display_form2()
+    elif st.session_state["current_form"] == 3:
+        display_form3()
+
     form1 = st.form("Introduction")
     form1.subheader("Reseach Topic Helper")
 
@@ -60,7 +65,7 @@ async def app():
             if "course" not in st.session_state:
                 st.session_state["course"] = course
             st.session_state["current_form"] = 2
-            display_form2()
+            await display_form2()
         else:
             form1.warning("Please enter your course.")        
 
@@ -91,30 +96,22 @@ async def display_form2():
         #save the data to the session state
         st.session_state["question"] = question
         st.session_state["research_area"] = selected_option
+        progress_bar = form3.progress(0, text="The AI teacher co-pilot is processing the request, please wait...")
+        if question:
+            response = await generate_response(question, context)
+            form2.write("Response:")
+            form2.write(response)
+        else:
+            form2.error("Please enter a prompt.")
 
-        display_form3()
-
-async def display_form3():
-    st.session_state["current_form"] = 3
-    question = st.session_state["question"]
-
-    form3 = st.form("Research Problems")
-    progress_bar = form3.progress(0, text="The AI teacher co-pilot is processing the request, please wait...")
-    if question:
-        response = await generate_response(question, context)
-        form3.write("Response:")
-        form3.write(response)
-    else:
-        form3.error("Please enter a prompt.")
-
-    # update the progress bar
-    for i in range(100):
-        # Update progress bar value
-        progress_bar.progress(i + 1)
-        # Simulate some time-consuming task (e.g., sleep)
-        time.sleep(0.01)
-    # Progress bar reaches 100% after the loop completes
-    form3.success("AI teacher co-pilot task completed!") 
+        # update the progress bar
+        for i in range(100):
+            # Update progress bar value
+            progress_bar.progress(i + 1)
+            # Simulate some time-consuming task (e.g., sleep)
+            time.sleep(0.01)
+        # Progress bar reaches 100% after the loop completes
+        form2.success("AI teacher co-pilot task completed!") 
 
 #run the app
 if __name__ == "__main__":
